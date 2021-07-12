@@ -192,27 +192,6 @@ class Metrics_Logger():
         )
         return self.total_correct / self.num_logged
 
-def prepare_folds(images_path, classes, n_folds):
-    cls_folds = []
-    for cls in classes:
-        all_images = os.listdir(os.path.join(images_path, cls))
-        random.shuffle(all_images)
-        l = len(all_images) // n_folds
-        splits = [all_images[i*l:(i+1)*l] for i in range(n_folds)]
-        folds = [([im for im in all_images if not im in split], split) for split in splits]
-        cls_folds.append(folds)
-    cls_folds = [[[f[i][j] for f in cls_folds] for j in range(len(classes))]for i in range(n_folds)]
-    return cls_folds
-
-def prepare_folder(images_path, classes):
-    image_names = []
-    for cls in classes:
-        print(images_path, cls)
-        all_images = os.listdir(os.path.join(images_path, cls))
-        random.shuffle(all_images)
-        image_names.append(all_images)
-    return image_names
-
 
 if __name__ == "__main__":
     FOLDS = False
@@ -236,8 +215,6 @@ if __name__ == "__main__":
     model_save_epoch = args.save_freq
     print("Training started with settings: {}".format(args))
     results =  []
-    # train_transforms = get_transforms(train=True)
-    # val_transforms = get_transforms(train=False)
     train_transforms, val_transforms = get_augmentations()
     loss_fn = torch.nn.BCEWithLogitsLoss()
     res = train(args.epochs, args.train_path, args.val_path)
