@@ -19,8 +19,8 @@ def train(num_epochs, train_path, val_path):
     """
     model = init_resnet(out_features=1)
     optimizer = Adam(model.parameters(), lr=args.lr)
-    train_dataset = MyFolderDataset(train_path, train_transforms, label_dict=label_dict)
-    val_dataset = MyFolderDataset(val_path, val_transforms, label_dict=label_dict)
+    train_dataset = MyFolderDataset(train_path, train_transforms, label_dict=label_dict, balanced=True)
+    val_dataset = MyFolderDataset(val_path, val_transforms, label_dict=label_dict, balanced=False)
     train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size)
     running_acc = None
@@ -205,8 +205,8 @@ if __name__ == "__main__":
     parser.add_argument("--no-validation", dest="no_validation",
         action="store_true", help="Don't do validation cycles during training")
     parser.add_argument("--images_path", type=str, default="forklift_set/all")
-    parser.add_argument("--train_path", type=str, default="/data/tlt_training/faurecia/data/new/faurecia_crops_balanced/train")
-    parser.add_argument("--val_path", type=str, default="/data/tlt_training/faurecia/data/new/faurecia_crops_balanced/val")
+    parser.add_argument("--train_path", type=str, default="/data/tlt_training/faurecia/data/new/all_crops_split/train")
+    parser.add_argument("--val_path", type=str, default="/data/tlt_training/faurecia/data/new/all_crops_split/val")
     n_folds = 5
     label_dict = {"empty_slot": 0, "full_slot": 1}
     args = parser.parse_args()
