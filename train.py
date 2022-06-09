@@ -73,7 +73,6 @@ def validate(model, val_loader):
     :param model: Trained model.
     :return: Validation metrics in form of a Metrics_Logger instance.
     """
-
     model.eval()
     val_logger = Metrics_Logger("Validation")
     for i, sample in enumerate(val_loader):
@@ -158,8 +157,7 @@ class Metrics_Logger():
         self.prefix = prefix
         self.loss = 0.
         self.total_correct = 0.
-        self.num_logged = 0.
-
+        self.num_logged = 0.00000001
     @torch.no_grad()
     def update(self, loss, num_correct, num_logged):
         """Updates the stored metrics for the logged batch.
@@ -179,7 +177,7 @@ class Metrics_Logger():
 
         self.loss = 0.
         self.total_correct = 0.
-        self.num_logged = 0.
+        self.num_logged = 0.00000001
 
     def write_summary(self):
         """Calculates human interpretable metrics and prints them.
@@ -196,19 +194,18 @@ class Metrics_Logger():
 if __name__ == "__main__":
     FOLDS = False
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=50,
+    parser.add_argument("--epochs", type=int, default=20,
         help="Total Number of Epochs")
-    parser.add_argument("--save-freq", type=int, default=25,
+    parser.add_argument("--save-freq", type=int, default=20,
         help="Number of train epochs between saving the model file")
     parser.add_argument("--bs", type=int, default=48, help="Batch size")
     parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
     parser.add_argument("--no-validation", dest="no_validation",
         action="store_true", help="Don't do validation cycles during training")
-    parser.add_argument("--images_path", type=str, default="forklift_set/all")
-    parser.add_argument("--train_path", type=str, default="/data/tlt_training/faurecia/data/new/all_crops_split/train")
-    parser.add_argument("--val_path", type=str, default="/data/tlt_training/faurecia/data/new/all_crops_split/val")
+    parser.add_argument("--train_path", type=str, default="/data/FST/demo/dataset/split/train")
+    parser.add_argument("--val_path", type=str, default="/data/FST/demo/dataset/split/val")
     n_folds = 5
-    label_dict = {"empty_slot": 0, "full_slot": 1}
+    label_dict = {"box": 0, "nobox": 1}
     args = parser.parse_args()
     batch_size = args.bs
     max_epochs = args.epochs

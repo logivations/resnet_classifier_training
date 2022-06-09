@@ -21,7 +21,7 @@ class MyFolderDataset(data.Dataset):
     def init_names(self):
         self.classes = os.listdir(self.root_path)
         for dirpath, dirnames, filenames in os.walk(self.root_path):
-            for filename in [f for f in filenames if f.endswith(".jpg")]:
+            for filename in [f for f in filenames]:
                 path = os.path.join(dirpath, filename)
                 self.image_paths.append(os.path.join(dirpath, filename))
                 self.labels.append(path.split("/")[-3])
