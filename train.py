@@ -1,4 +1,5 @@
 import argparse
+import pdb
 import random
 random.seed(0)
 import torch
@@ -17,12 +18,16 @@ def train(num_epochs, train_path, val_path):
     :param num_epochs: Number of epochs that the model is being trained for.
     :return: Trained Model.
     """
-    model = init_resnet(out_features=1)
+    model = init_resnet(out_features=len(label_dict))
     optimizer = Adam(model.parameters(), lr=args.lr)
-    train_dataset = MyFolderDataset(train_path, train_transforms, label_dict=label_dict, balanced=True)
-    val_dataset = MyFolderDataset(val_path, val_transforms, label_dict=label_dict, balanced=False)
+    # train_dataset = MyFolderDataset(train_path, train_transforms, label_dict=label_dict, balanced=True)
+    # val_dataset = MyFolderDataset(val_path, val_transforms, label_dict=label_dict, balanced=False)
+
+    train_dataset = torchvision.datasets.ImageFolder(root=train_path, transform=train_transforms)
+    val_dataset = torchvision.datasets.ImageFolder(root=val_path, transform=val_transforms)
     train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size)
+    pdb.set_trace()
     running_acc = None
     train_logger = Metrics_Logger("Train")
     for epoch in range(num_epochs):
@@ -35,10 +40,10 @@ def train(num_epochs, train_path, val_path):
                 continue
             model.train()
             images = images.cuda()
-            labels = labels.float().cuda()
+            labels = labels.long().cuda()
             optimizer.zero_grad()
             outputs = model(images)
-            outputs = outputs.reshape(outputs.shape[0])
+            # outputs = outputs.reshape(outputs.shape[0])
             classification_loss = loss_fn(outputs, labels)
             num_correct = count_correct_predictions(outputs, labels)
             train_logger.update(classification_loss,
@@ -61,7 +66,7 @@ def train(num_epochs, train_path, val_path):
         train_logger.reset()
         if (epoch + 1) % model_save_epoch == 0:
             save_model(epoch, model)
-    print("Training finished.")
+    print(f"Training finished. \n Accuracy: {running_acc}, Classes used: {train_dataset.classes}")
     return running_acc
 
 
@@ -78,9 +83,9 @@ def validate(model, val_loader):
     for i, sample in enumerate(val_loader):
         images, labels = sample
         images = images.cuda()
-        labels = labels.float().cuda()
+        labels = labels.long().cuda()
         outputs = model(images)
-        outputs = outputs.reshape(outputs.shape[0])
+        # outputs = outputs.reshape(outputs.shape[0])
         loss = loss_fn(outputs, labels)
         num_correct = count_correct_predictions(outputs, labels)
         val_logger.update(loss, num_correct, outputs.shape[0])
@@ -144,8 +149,7 @@ def count_correct_predictions(outputs, labels):
     :param labels: Class annotations, matching the output shape.
     :return: Number of correct predictions, over all outputs.
     """
-
-    predictions = torch.round(torch.sigmoid(outputs))
+    predictions = torch.argmax(outputs, dim=1)
     num_correct = torch.sum(predictions == labels).squeeze().double()
     #print("samples", outputs.shape[0])
     #print("num_cor", num_correct)
@@ -194,7 +198,7 @@ class Metrics_Logger():
 if __name__ == "__main__":
     FOLDS = False
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=20,
+    parser.add_argument("--epochs", type=int, default=40,
         help="Total Number of Epochs")
     parser.add_argument("--save-freq", type=int, default=20,
         help="Number of train epochs between saving the model file")
@@ -205,7 +209,7 @@ if __name__ == "__main__":
     parser.add_argument("--train_path", type=str, default="/data/FST/demo/dataset/split/train")
     parser.add_argument("--val_path", type=str, default="/data/FST/demo/dataset/split/val")
     n_folds = 5
-    label_dict = {"box": 0, "nobox": 1}
+    label_dict = {"person": 0, "blue_person": 1, "red_person": 2, "yellow_person": 3}
     args = parser.parse_args()
     batch_size = args.bs
     max_epochs = args.epochs
@@ -213,6 +217,6 @@ if __name__ == "__main__":
     print("Training started with settings: {}".format(args))
     results =  []
     train_transforms, val_transforms = get_augmentations()
-    loss_fn = torch.nn.BCEWithLogitsLoss()
+    loss_fn = torch.nn.CrossEntropyLoss()
     res = train(args.epochs, args.train_path, args.val_path)
-    print("Training finished. \n Accuracy: {}".format(res))
+
