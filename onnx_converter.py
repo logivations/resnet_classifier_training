@@ -8,8 +8,8 @@ import torch.onnx
 
 from train import init_resnet
 
-model = init_resnet(out_features=4)
-model.load_state_dict(torch.load("checkpoints/wests_128.model"))
+model = init_resnet(out_features=2)
+model.load_state_dict(torch.load("checkpoints/epoch_40.model"))
 model.eval()
 
 x = torch.randn(1, 3, 128, 128, requires_grad=True).cuda()

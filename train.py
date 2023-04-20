@@ -27,7 +27,7 @@ def train(num_epochs, train_path, val_path):
     val_dataset = torchvision.datasets.ImageFolder(root=val_path, transform=val_transforms)
     train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size)
-    pdb.set_trace()
+    
     running_acc = None
     train_logger = Metrics_Logger("Train")
     for epoch in range(num_epochs):
@@ -202,14 +202,14 @@ if __name__ == "__main__":
         help="Total Number of Epochs")
     parser.add_argument("--save-freq", type=int, default=20,
         help="Number of train epochs between saving the model file")
-    parser.add_argument("--bs", type=int, default=48, help="Batch size")
+    parser.add_argument("--bs", type=int, default=12, help="Batch size")
     parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
     parser.add_argument("--no-validation", dest="no_validation",
         action="store_true", help="Don't do validation cycles during training")
     parser.add_argument("--train_path", type=str, default="/data/FST/demo/dataset/split/train")
     parser.add_argument("--val_path", type=str, default="/data/FST/demo/dataset/split/val")
     n_folds = 5
-    label_dict = {"person": 0, "blue_person": 1, "red_person": 2, "yellow_person": 3}
+    label_dict = {"loaded": 0, "unloaded": 1}
     args = parser.parse_args()
     batch_size = args.bs
     max_epochs = args.epochs
